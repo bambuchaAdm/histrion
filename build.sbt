@@ -9,7 +9,7 @@ scalaVersion := "2.10.3"
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % "2.2.3",
   "com.typesafe.slick" %% "slick" % "2.0.0",
-  "org.slf4j" % "slf4j-nop" % "1.6.4"
+  "ch.qos.logback" % "logback-classic" % "1.0.3"
   )
 
 libraryDependencies ++= Seq(

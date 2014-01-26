@@ -1,7 +1,8 @@
 package org.virtuslab.histrion
 
 import scala.slick.driver.H2Driver.simple._
-import org.scalatest.{fixture, Outcome, Matchers}
+import org.scalatest.{BeforeAndAfterAll, fixture, Outcome}
+import java.io.File
 
 case class TestEntity(id: Int, value: Int)
 
@@ -14,16 +15,23 @@ class TestTable(tag: Tag) extends Table[(Int,Int)](tag,"test") {
   def * = (id,value)
 }
 
-class TestDatabase(database: Database){
+class TestDatabase(private val id: Int, file: File){
 
-  def this(id:Int) = {
-    this(Database.forURL("jdbc:h2:mem:test"+id, driver = "org.h2.Driver"))
-    database.withSession(s => test.ddl.create(s))
+  val database = Database.forURL(s"jdbc:h2:${file.getAbsolutePath}${id}", driver = "org.h2.Driver")
+
+  def this(id:Int) =  {
+    this(id, File.createTempFile("histrion",""))
+    database.withSession{ implicit s =>
+      test.ddl.create
+      test += (1,1)
+    }
   }
 
   val test = TableQuery[TestTable]
 
-  def withTransaction[T](f : (Session) => T) = database.withTransaction(f)
+  def withTransaction[T](f : Session => T) : T = database.withTransaction(f)
+
+  def withSession[T](f: Session => T) : T = database.withSession(f)
 }
 
 object TestDatabase {
@@ -34,14 +42,18 @@ object TestDatabase {
   }
 }
 
-trait DatabaseFixture { self : fixture.FlatSpec =>
+trait DatabaseFixture extends BeforeAndAfterAll { self : fixture.FlatSpec =>
 
   protected val database = TestDatabase.get
 
-  type FixtureParam = Session
+  type FixtureParam = TestDatabase
 
   protected def withFixture(test: OneArgTest): Outcome = {
-    database.withTransaction(session => test.apply(session))
+    test.apply(database)
+  }
+
+  override protected def afterAll(): Unit = {
+    super.afterAll()
   }
 }
 

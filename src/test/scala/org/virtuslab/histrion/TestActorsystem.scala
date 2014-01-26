@@ -13,4 +13,5 @@ trait TestActorSystem { self: Suite =>
 
 trait ActorTestKit extends TestActorSystem with TestKitBase {
   self: Suite =>
+  implicit val sender = testActor
 }
