@@ -51,9 +51,5 @@ trait DatabaseFixture extends BeforeAndAfterAll { self : fixture.FlatSpec =>
   protected def withFixture(test: OneArgTest): Outcome = {
     test.apply(database)
   }
-
-  override protected def afterAll(): Unit = {
-    super.afterAll()
-  }
 }
 
