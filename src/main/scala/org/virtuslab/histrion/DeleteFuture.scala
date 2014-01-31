@@ -3,7 +3,7 @@ package org.virtuslab.histrion
 import scala.slick.driver.H2Driver.simple._
 import scala.concurrent.Promise
 
-class DeleteFuture[A,B](session: Session, query: Query[A,B]) extends Runnable {
+class DeleteFuture[A <: Table[_], B](session: Session, query: Query[A, B]) extends Runnable {
 
   val promise = Promise[Int]()
 

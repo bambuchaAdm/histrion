@@ -16,13 +16,13 @@ class QueryExecutor(database: Database) extends ExecutionContext {
   val threadExecutor = Executors.newSingleThreadExecutor()
   val session = database.createSession()
 
-  def scheduleSelect[A,B](query: Query[A, B]) : Future[Seq[B]] = {
+  def scheduleSelect[A, B](query: Query[A, B]) : Future[Seq[B]] = {
     val queryResolver = new SelectFuture(session,query)
     threadExecutor.submit(queryResolver)
     queryResolver.promise.future
   }
 
-  def scheduleDelete[A,B](query: Query[A, B]) : Future[Int] = {
+  def scheduleDelete[A <: Table[_], B](query: Query[A, B]) : Future[Int] = {
     val deletionFuture = new DeleteFuture(session, query)
     threadExecutor.submit(deletionFuture)
     deletionFuture.promise.future
