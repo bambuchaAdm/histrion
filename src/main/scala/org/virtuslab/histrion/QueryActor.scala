@@ -11,6 +11,6 @@ trait QueryActor extends Actor{
   implicit val executor : QueryExecutor
 
   protected implicit class QueryOperation[A,B](val query: Query[A, B]){
-    def run() : Unit = executor.schedule(query).pipeTo(sender)
-  }
+    def run() : Unit = executor.scheduleSelect(query).pipeTo(sender)
+    def deleteAll() : Unit = executor.scheduleDelete(query).pipeTo(sender)
 }

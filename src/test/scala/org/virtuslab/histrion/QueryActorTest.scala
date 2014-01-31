@@ -24,7 +24,7 @@ class TestQueryActor(val table: TableQuery[TestTable], val executor: QueryExecut
     case GetAll => query.run()
     case ById(id) => byId(id).run
     case ByValue(value) => byValue(value).run
-    case Delete(id) => byId(id).delete
+    case Delete(id) => byId(id).deleteAll
   }
 }
 
