@@ -15,17 +15,23 @@ class TestTable(tag: Tag) extends Table[(Int,Int)](tag,"test") {
   def * = (id,value)
 }
 
-class TestDatabase(private val id: Int, file: File){
+class TestDatabase(id: Int, val file: File){
 
   val database = Database.forURL(s"jdbc:h2:${file.getAbsolutePath}${id}", driver = "org.h2.Driver")
 
   def this(id:Int) =  {
     this(id, File.createTempFile("histrion",""))
+    init()
+  }
+
+  def init() : Unit = {
     database.withSession{ implicit s =>
       test.ddl.create
-      test += (1,1)
+      all.foreach(x => test += x)
     }
   }
+
+  val all = Vector((1,1),(2,10),(3,42))
 
   val test = TableQuery[TestTable]
 
@@ -44,12 +50,14 @@ object TestDatabase {
 
 trait DatabaseFixture extends BeforeAndAfterAll { self : fixture.FlatSpec =>
 
-  protected val database = TestDatabase.get
 
   type FixtureParam = TestDatabase
 
   protected def withFixture(test: OneArgTest): Outcome = {
-    test.apply(database)
+    val database = TestDatabase.get
+    val result  = test.apply(database)
+    database.file.delete()
+    result
   }
 }
 
