@@ -2,16 +2,19 @@ package org.virtuslab.histrion
 
 import org.scalatest.fixture
 import akka.actor.Props
+import akka.dispatch.ExecutionContexts
 
 
 class QueryActorIntegrationTest extends fixture.FlatSpec with ActorTestKit with DatabaseFixture
 {
-  behavior of classOf[QueryActor].getSimpleName
+  behavior of "QueryActor"
 
   import TestQueryActorProtocol._
 
+  val executionContext = ExecutionContexts.global()
+
   it should "can run query" in { database =>
-    val executor = new QueryExecutor(database.database)
+    val executor = new QueryExecutor(database.database, executionContext)
     val props = Props(classOf[TestQueryActor], database.test, executor)
     val actor = system.actorOf(props)
     actor ! GetAll
@@ -19,7 +22,7 @@ class QueryActorIntegrationTest extends fixture.FlatSpec with ActorTestKit with 
   }
 
   it should "query by ID" in { database =>
-    val executor = new QueryExecutor(database.database)
+    val executor = new QueryExecutor(database.database, executionContext)
     val props = Props(classOf[TestQueryActor], database.test, executor)
     val actor = system.actorOf(props)
     val id: Int = 2
@@ -29,7 +32,7 @@ class QueryActorIntegrationTest extends fixture.FlatSpec with ActorTestKit with 
   }
 
   it should "query by Value" in { database =>
-    val executor = new QueryExecutor(database.database)
+    val executor = new QueryExecutor(database.database, executionContext)
     val props = Props(classOf[TestQueryActor], database.test, executor)
     val actor = system.actorOf(props)
     val value: Int = 42
@@ -39,7 +42,7 @@ class QueryActorIntegrationTest extends fixture.FlatSpec with ActorTestKit with 
   }
 
   it should "delete by value" in { database =>
-    val executor = new QueryExecutor(database.database)
+    val executor = new QueryExecutor(database.database, executionContext)
     val props = Props(classOf[TestQueryActor], database.test, executor)
     val actor = system.actorOf(props)
     val id: Int = 3
@@ -50,7 +53,7 @@ class QueryActorIntegrationTest extends fixture.FlatSpec with ActorTestKit with 
   }
 
   it should "update value using ID" in {database =>
-    val executor = new QueryExecutor(database.database)
+    val executor = new QueryExecutor(database.database, executionContext)
     val props = Props(classOf[TestQueryActor], database.test, executor)
     val actor = system.actorOf(props)
     val id = 3
