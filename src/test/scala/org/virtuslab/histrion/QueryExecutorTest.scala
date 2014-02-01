@@ -1,6 +1,6 @@
 package org.virtuslab.histrion
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{Outcome, FlatSpec, Matchers}
 import org.scalatest.mock.MockitoSugar
 import scala.slick.driver.H2Driver.simple._
 import scala.concurrent.ExecutionContext
@@ -16,13 +16,31 @@ class QueryExecutorTest extends FlatSpec with Matchers with MockitoSugar {
   import Mockito._
   import org.mockito.Matchers._
 
-  it should "call execution context on scheduling query" in {
-    val executionContext = mock[ExecutionContext]
-    val query = mock[Query[_, _]]
-    val queryExecutor = new QueryExecutor(mock[Database], executionContext)
+  val executionContext = mock[ExecutionContext]
+  val query = mock[Query[Table[_], _]]
+  val updateQuery = mock[Query[Column[Int], Int]]
+  val database = mock[Database]
+  val queryExecutor = new QueryExecutor(database, executionContext)
+
+  override protected def withFixture(test: NoArgTest): Outcome = {
+    reset(executionContext, query, database, updateQuery)
+    test()
+  }
+
+  it should "schedule select future on  select query" in {
     queryExecutor.scheduleSelect(query)
     verify(executionContext).execute(isA(classOf[SelectFuture[_, _]]))
-
   }
+
+  it should "schedule delete future on delete query" in {
+    queryExecutor.scheduleDelete(query)
+    verify(executionContext).execute(isA(classOf[DeleteFuture[_, _]]))
+  }
+
+  it should "schedule update future on update query" in {
+    queryExecutor.scheduleUpdate(updateQuery,5)
+    verify(executionContext).execute(isA(classOf[UpdateFuture[_, _]]))
+  }
+
 
 }
