@@ -15,4 +15,8 @@ trait QueryActor extends Actor{
     def run() : Unit = executor.scheduleSelect(query).pipeTo(sender)
     def deleteAll() : Unit = executor.scheduleDelete(query).pipeTo(sender)
   }
+
+  protected implicit class UpdateOperation[A <: Column[_], B](val query: Query[A,B]){
+    def updateWith(value: B) = executor.scheduleUpdate(query,value).pipeTo(sender)
+  }
 }

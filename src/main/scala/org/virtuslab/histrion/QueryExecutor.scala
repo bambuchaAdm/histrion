@@ -28,6 +28,12 @@ class QueryExecutor(database: Database) extends ExecutionContext {
     deletionFuture.promise.future
   }
 
+  def scheduleUpdate[A,B](query: Query[A,B], value: B) : Future[Int] = {
+    val updateFuture = new UpdateFuture(session, query, value)
+    threadExecutor.submit(updateFuture)
+    updateFuture.promise.future
+  }
+
   def execute(runnable: Runnable): Unit = threadExecutor.submit(runnable)
 
   def reportFailure(t: Throwable): Unit = logger.error("Error in database execution context", t)
