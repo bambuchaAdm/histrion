@@ -56,10 +56,12 @@ trait DatabaseFixture extends BeforeAndAfterAll { self : fixture.FlatSpec =>
 
   protected def withFixture(test: OneArgTest): Outcome = {
     val database = TestDatabase.get
-    database.init()
-    val result  = test.apply(database)
-    database.close()
-    result
+    try {
+      database.init()
+      test.apply(database)
+    } finally {
+      database.close()
+    }
   }
 }
 
