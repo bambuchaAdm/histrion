@@ -72,4 +72,17 @@ class QueryActorTest extends fixture.FlatSpec with ActorTestKit with DatabaseFix
     actor ! GetAll
     expectMsg(database.all.filter(_._1 != id))
   }
+
+  it should "update value using ID" in {database =>
+    val executor = new QueryExecutor(database.database)
+    val props = Props(classOf[TestQueryActor], database.test, executor)
+    val actor = system.actorOf(props)
+    val id = 3
+    val newValue = 43
+    actor ! Update(id,newValue)
+    expectMsg(1)
+    actor ! ById(id)
+    expectMsg(Vector((id,newValue)))
+
+  }
 }
