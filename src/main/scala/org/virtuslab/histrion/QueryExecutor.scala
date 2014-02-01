@@ -11,8 +11,6 @@ import scala.slick.driver.H2Driver.simple._
  */
 class QueryExecutor(database: Database, context: ExecutionContext) extends ExecutionContext {
 
-  val logger = LoggerFactory.getLogger(s"Executor ${database.toString}")
-
   val session = database.createSession()
 
   def scheduleSelect[A, B](query: Query[A, B]) : Future[Seq[B]] = {
