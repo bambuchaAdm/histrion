@@ -68,6 +68,7 @@ class QueryActorTest extends fixture.FlatSpec with ActorTestKit with DatabaseFix
     val actor = system.actorOf(props)
     val id: Int = 3
     actor ! Delete(id)
+    expectMsg(1)
     actor ! GetAll
     expectMsg(database.all.filter(_._1 != id))
   }
