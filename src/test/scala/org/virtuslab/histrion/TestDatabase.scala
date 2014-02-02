@@ -2,7 +2,9 @@ package org.virtuslab.histrion
 
 import scala.slick.driver.H2Driver.simple._
 import org.scalatest.{BeforeAndAfterAll, fixture, Outcome}
-import java.io.File
+import org.slf4j.LoggerFactory
+import scala.util.Random
+import java.util.concurrent.atomic.AtomicInteger
 
 case class TestEntity(id: Int, value: Int)
 
@@ -34,7 +36,12 @@ class TestDatabase(id: Int){
 
   val all = Vector((1,1),(2,10),(3,42))
 
+  val persons = Vector(Person(None, "Profesor Kleks", "Ambroży", "Kleks", 100),
+                       Person(None, "Golarz Filip", "Filip", "Golarz", 3))
+
   val test = TableQuery[TestTable]
+
+  val personTest = TableQuery[BigTestTable]
 
   def withTransaction[T](f : Session => T) : T = database.withTransaction(f)
 
@@ -42,10 +49,12 @@ class TestDatabase(id: Int){
 }
 
 object TestDatabase {
-  var counter = 0
+  var counter = new AtomicInteger(Random.nextInt(1500))
   def get : TestDatabase = {
-    counter += 1
-    new TestDatabase(counter)
+    LoggerFactory.getLogger(classOf[TestDatabase]).info("Next database {}",counter)
+    val result = new TestDatabase(counter.getAndIncrement)
+    result.init()
+    result
   }
 }
 
@@ -57,7 +66,6 @@ trait DatabaseFixture extends BeforeAndAfterAll { self : fixture.FlatSpec =>
   protected def withFixture(test: OneArgTest): Outcome = {
     val database = TestDatabase.get
     try {
-      database.init()
       test.apply(database)
     } finally {
       database.close()
