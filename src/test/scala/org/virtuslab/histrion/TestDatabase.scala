@@ -17,6 +17,23 @@ class TestTable(tag: Tag) extends Table[(Int,Int)](tag,"test") {
   def * = (id,value)
 }
 
+case class Person(id: Option[Int], nick: String, sureName: String, firstName: String, age: Int)
+
+class BigTestTable(tag: Tag) extends Table[Person](tag, "persons") {
+
+  def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
+
+  def firstName = column[String]("firstname")
+
+  def sureName = column[String]("surename")
+
+  def nick = column[String]("nick")
+
+  def age = column[Int]("age")
+
+  def * = (id.?, nick, sureName, firstName, age) <> (Person.tupled, Person.unapply)
+}
+
 class TestDatabase(id: Int){
 
   val database = Database.forURL(s"jdbc:h2:mem:$id", driver = "org.h2.Driver")
@@ -26,6 +43,7 @@ class TestDatabase(id: Int){
   def init() : Unit = {
     database.withSession{ implicit s =>
       test.ddl.create
+      personTest.ddl.create
       all.foreach(x => test += x)
     }
   }
