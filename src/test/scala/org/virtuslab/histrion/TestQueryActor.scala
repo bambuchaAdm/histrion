@@ -29,9 +29,9 @@ class TestQueryActor(val table: TableQuery[TestTable], val executor: QueryExecut
 
   def receive: Actor.Receive = {
     case GetAll => query.run()
-    case ById(id) => byId(id).run
-    case ByValue(value) => byValue(value).run
-    case Delete(id) => byId(id).deleteAll
+    case ById(id) => byId(id).run()
+    case ByValue(value) => byValue(value).run()
+    case Delete(id) => byId(id).deleteAll()
     case Update(id, value) => updateValueById(id).updateWith(value)
   }
 }
