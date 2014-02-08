@@ -17,7 +17,7 @@ class TestTable(tag: Tag) extends Table[(Int,Int)](tag,"test") {
   def * = (id,value)
 }
 
-case class Person(id: Option[Int], nick: String, sureName: String, firstName: String, age: Int)
+case class Person(id: Option[Int], nick: String, fistName: String, sureName: String, age: Int)
 
 class BigTestTable(tag: Tag) extends Table[Person](tag, "persons") {
 
@@ -31,7 +31,7 @@ class BigTestTable(tag: Tag) extends Table[Person](tag, "persons") {
 
   def age = column[Int]("age")
 
-  def * = (id.?, nick, sureName, firstName, age) <> (Person.tupled, Person.unapply)
+  def * = (id.?, nick, firstName, sureName, age) <> (Person.tupled, Person.unapply)
 }
 
 class TestDatabase(id: Int){

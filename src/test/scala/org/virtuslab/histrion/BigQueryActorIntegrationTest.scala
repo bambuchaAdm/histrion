@@ -29,4 +29,11 @@ class BigQueryActorIntegrationTest extends fixture.FlatSpec with ActorTestKit wi
     bigQueryActor ! ById(1)
     expectMsg(database.persons.filter(_.nick matches "Profesor.*"))
   }
+
+  it should "return persons by first name and sure name" in { database =>
+    val queryExecutor = new QueryExecutor(database.database, executionContext)
+    val bigQueryActor = system.actorOf(Props(classOf[BigQueryActor], database.personTest, queryExecutor))
+    bigQueryActor ! ByFirstNameAndSureName("Ambroży", "Kleks")
+    expectMsg(database.persons.filter(_.nick matches "Profesor.*"))
+  }
 }
