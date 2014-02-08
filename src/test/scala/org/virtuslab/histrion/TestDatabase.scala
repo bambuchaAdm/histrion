@@ -38,13 +38,14 @@ class TestDatabase(id: Int){
 
   val database = Database.forURL(s"jdbc:h2:mem:$id", driver = "org.h2.Driver")
 
-  var connection = database.createConnection() // Persists memory database between sessions
+  val connection = database.createConnection() // Persists memory database between sessions
 
   def init() : Unit = {
     database.withSession{ implicit s =>
       test.ddl.create
       personTest.ddl.create
       all.foreach(x => test += x)
+      persons.foreach(person => personTest += person)
     }
   }
 
@@ -54,8 +55,8 @@ class TestDatabase(id: Int){
 
   val all = Vector((1,1),(2,10),(3,42))
 
-  val persons = Vector(Person(None, "Profesor Kleks", "Ambroży", "Kleks", 100),
-                       Person(None, "Golarz Filip", "Filip", "Golarz", 3))
+  val persons = Vector(Person(Some(1), "Profesor Kleks", "Ambroży", "Kleks", 100),
+                       Person(Some(2), "Golarz Filip", "Filip", "Golarz", 3))
 
   val test = TableQuery[TestTable]
 

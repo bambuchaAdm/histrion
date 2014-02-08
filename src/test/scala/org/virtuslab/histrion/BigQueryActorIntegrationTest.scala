@@ -14,8 +14,19 @@ class BigQueryActorIntegrationTest extends fixture.FlatSpec with ActorTestKit wi
 
   val executionContext = ExecutionContexts.global()
 
+  import BigQueryActorProtocol._
+
   it should "return Vector of Persons after querying for all" in { database =>
     val queryExecutor = new QueryExecutor(database.database, executionContext)
-    val bigQueryActor = system.actorOf(Props(classOf[BigQueryActor]))
+    val bigQueryActor = system.actorOf(Props(classOf[BigQueryActor], database.personTest, queryExecutor))
+    bigQueryActor ! GetAll
+    expectMsg(database.persons)
+  }
+
+  it should "return Vector with person with selected ID" in { database =>
+    val queryExecutor = new QueryExecutor(database.database, executionContext)
+    val bigQueryActor = system.actorOf(Props(classOf[BigQueryActor], database.personTest, queryExecutor))
+    bigQueryActor ! ById(1)
+    expectMsg(database.persons.filter(_.nick matches "Profesor.*"))
   }
 }
