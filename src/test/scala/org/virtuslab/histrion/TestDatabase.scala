@@ -41,6 +41,7 @@ class TestDatabase(id: Int){
   val connection = database.createConnection() // Persists memory database between sessions
 
   def init() : Unit = {
+    LoggerFactory.getLogger("database.conter").info("Database counter {}", id)
     database.withSession{ implicit s =>
       test.ddl.create
       personTest.ddl.create
@@ -70,7 +71,6 @@ class TestDatabase(id: Int){
 object TestDatabase {
   var counter = new AtomicInteger(Random.nextInt(1500))
   def get : TestDatabase = {
-    LoggerFactory.getLogger(classOf[TestDatabase]).info("Next database {}",counter)
     val result = new TestDatabase(counter.getAndIncrement)
     result.init()
     result

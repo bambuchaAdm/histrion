@@ -16,9 +16,13 @@ class BigQueryActor(table: TableQuery[BigTestTable], val executor: QueryExecutor
 
   import slick.driver.H2Driver.simple._
 
+  def findByFirstNameAndSureName(first: String, sure: String) = {
+    table.filter(row => row.firstName === first && row.sureName === sure)
+  }
+
   def receive: Actor.Receive = {
     case GetAll => table.run()
     case ById(id) => table.filter(_.id === id).run()
-    case ByFirstNameAndSureName(firstName, sureName) => table.filter(row => row.firstName === firstName && row.sureName === sureName).run()
+    case ByFirstNameAndSureName(firstName, sureName) => findByFirstNameAndSureName(firstName, sureName).run()
   }
 }
