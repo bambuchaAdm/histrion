@@ -8,7 +8,7 @@ import scala.slick.driver.H2Driver.simple._
 /**
  * Created by Łukasz Dubiel.
  */
-trait QueryActor extends Actor{
+trait QueryActor extends Actor {
   implicit val executor : QueryExecutor
 
   protected implicit class QueryOperation[A <: Table[_], B](val query: Query[A, B]){

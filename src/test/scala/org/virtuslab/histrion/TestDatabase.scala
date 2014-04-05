@@ -17,11 +17,11 @@ class TestTable(tag: Tag) extends Table[(Int,Int)](tag,"test") {
   def * = (id,value)
 }
 
-case class Person(id: Option[Int], nick: String, fistName: String, sureName: String, age: Int)
+case class Person(id: Option[Long], nick: String, fistName: String, sureName: String, age: Int)
 
-class BigTestTable(tag: Tag) extends Table[Person](tag, "persons") {
+class MappingTable(tag: Tag) extends Table[Person](tag, "people") {
 
-  def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
+  def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
   def firstName = column[String]("firstname")
 
@@ -38,7 +38,7 @@ class TestDatabase(id: Int){
 
   val database = Database.forURL(s"jdbc:h2:mem:$id", driver = "org.h2.Driver")
 
-  val connection = database.createConnection() // Persists memory database between sessions
+  val connection = database.createConnection() // Persists memory database between testcase
 
   def init() : Unit = {
     LoggerFactory.getLogger("database.conter").info("Database counter {}", id)
@@ -61,7 +61,7 @@ class TestDatabase(id: Int){
 
   val test = TableQuery[TestTable]
 
-  val personTest = TableQuery[BigTestTable]
+  val personTest = TableQuery[MappingTable]
 
   def withTransaction[T](f : Session => T) : T = database.withTransaction(f)
 

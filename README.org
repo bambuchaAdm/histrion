@@ -1,0 +1,86 @@
+* Histrion
+
+Tiny library for using Slick in Akka system less painfull.
+
+** Tutorial
+
+Let's start with table definitions
+
+#+BEGIN_SRC scala
+
+case class Person(id: Option[Long], nick: String, fistName: String, sureName: String, age: Int)
+
+class MappingTable(tag: Tag) extends Table[Person](tag, "people") {
+
+  def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
+  def firstName = column[String]("firstname")
+
+  def sureName = column[String]("surename")
+
+  def nick = column[String]("nick")
+
+  def age = column[Int]("age")
+
+  def * = (id.?, nick, firstName, sureName, age) <> (Person.tupled, Person.unapply)
+}
+
+#+END_SRC
+
+And define our RepositoryActor 
+
+#+BEGIN_SRC scala
+
+object MappingQueryActorProtocol {
+  object GetAll
+  case class ById(id: Long)
+  case class ByNick(nick: String)
+  case class ByFirstNameAndSureName(first: String, second: String)
+}
+
+class MappingQueryActor(table: TableQuery[MappingTable], val executor: QueryExecutor) extends  QueryActor {
+  import MappingQueryActorProtocol._
+
+  import slick.driver.H2Driver.simple._
+
+  def findByFirstNameAndSureName(first: String, sure: String) = {
+    table.filter(row => row.firstName === first && row.sureName === sure)
+  }
+
+  def findById(id: Long) = {
+    table.filter(_.id === id)
+  }
+
+  def receive: Actor.Receive = {
+    case GetAll => table.run()
+    case ById(id) => findById(id).run()
+    case ByFirstNameAndSureName(firstName, sureName) => findByFirstNameAndSureName(firstName, sureName).run()
+  }
+}
+
+#+END_SRC
+
+Let's go to =receive= method. At first w have just =table.run()= as function call.
+=run()= method is added by implicit class and it will evaluate query in =QueryExecutor=
+and send result to sender actor. 
+
+Now we have usage of our =RepositoryActor= 
+
+#+BEGIN_SRC scala
+
+class UsageActor(repository: ActorRef) extends Actor{
+
+  import MappingQueryActorProtocol._
+
+  def receive = {
+    case _ =>
+      repository ! GetAll
+      context.become(queryResult)
+  }
+
+  def queryResult : Actor.Receive = {
+    case result : Iterable[Person] => result.foreach( println(_))
+  }
+}
+
+#+END_SRC
